@@ -14,7 +14,10 @@
     },
     "ios": {
       "icon": "./assets/expo.icon",
-      "bundleIdentifier": "com.shanmuga.busapp"
+      "bundleIdentifier": "com.shanmuga.busapp",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "com.shanmuga.busapp",

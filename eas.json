@@ -5,11 +5,15 @@
   },
   "build": {
     "preview": {
+      "developmentClient": false,
+      "distribution": "internal",
       "android": {
         "buildType": "apk"
       }
     },
     "production": {
+      "developmentClient": false,
+      "distribution": "internal",
       "android": {
         "buildType": "apk"
       }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import {
   Modal,
   View,
@@ -144,7 +144,7 @@ export default function BusModal({
     }
   };
 
-  const imageSource = photo ? { uri: photo } : { uri: DEFAULT_BUS_IMG };
+  const imageSource = photo ? { uri: photo } : DEFAULT_BUS_IMG;
 
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
@@ -165,7 +165,7 @@ export default function BusModal({
               ) : null}
             </View>
             <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
-              <Text style={styles.closeBtnText}>✕</Text>
+              <Text style={styles.closeBtnText}>âœ•</Text>
             </TouchableOpacity>
           </View>
 
@@ -199,13 +199,13 @@ export default function BusModal({
                   </View>
                   {contact ? (
                     <TouchableOpacity style={styles.callButton} onPress={handleCall}>
-                      <Text style={styles.callButtonText}>📞 Call Driver</Text>
+                      <Text style={styles.callButtonText}>ðŸ“ž Call Driver</Text>
                     </TouchableOpacity>
                   ) : null}
                 </View>
 
                 <View style={styles.fieldRow}>
-                  <Text style={styles.fieldLabel}>Route Location (Start ➔ Campus)</Text>
+                  <Text style={styles.fieldLabel}>Route Location (Start âž” Campus)</Text>
                   <Text style={styles.fieldValue}>
                     {route || <Text style={styles.emptyText}>No route details</Text>}
                   </Text>
@@ -272,12 +272,12 @@ export default function BusModal({
                 </View>
 
                 <View style={styles.inputGroup}>
-                  <Text style={styles.label}>Route Location (Start ➔ Campus)</Text>
+                  <Text style={styles.label}>Route Location (Start âž” Campus)</Text>
                   <TextInput
                     style={styles.input}
                     value={route}
                     onChangeText={setRoute}
-                    placeholder="e.g. Polur ➔ Campus"
+                    placeholder="e.g. Polur âž” Campus"
                     placeholderTextColor="#999"
                   />
                 </View>
@@ -286,7 +286,7 @@ export default function BusModal({
                   <Text style={styles.label}>Bus Photo</Text>
                   <View style={styles.photoActions}>
                     <TouchableOpacity style={styles.photoPickBtn} onPress={handlePickImage}>
-                      <Text style={styles.photoPickBtnText}>📷 Select Photo</Text>
+                      <Text style={styles.photoPickBtnText}>ðŸ“· Select Photo</Text>
                     </TouchableOpacity>
                     {photo ? (
                       <TouchableOpacity
@@ -524,3 +524,4 @@ const styles = StyleSheet.create({
     textDecorationLine: 'underline',
   },
 });
+

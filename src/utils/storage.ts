@@ -16,7 +16,7 @@ export interface UserSession {
 const STORAGE_KEY = 'campus_buses_v3';
 const SESSION_KEY = 'campus_bus_user_session';
 
-export const DEFAULT_BUS_IMG = 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&auto=format&fit=crop&q=80';
+export const DEFAULT_BUS_IMG = require('../../assets/images/bus-image.jpg');
 export const DEFAULT_CONTACT_NUMBER = '98765 43210';
 
 // 50 Tiruvannamalai District & Regional Routes for Shanmuga Industries Arts & Science College

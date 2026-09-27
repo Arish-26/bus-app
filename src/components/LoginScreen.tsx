@@ -34,12 +34,13 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
     }
 
     if (role === 'student') {
-      // Validate roll number range: 111623104001 to 111623104040
-      const num = parseInt(trimmed, 10);
-      if (isNaN(num) || num < 111623104001 || num > 111623104040) {
+      // Validate roll number range: 20924U48001 to 20924U48036
+      const suffix = trimmed.toUpperCase().match(/^20924U48(\d+)$/);
+      const rollNum = suffix ? parseInt(suffix[1], 10) : NaN;
+      if (!trimmed.toUpperCase().startsWith('20924U48') || isNaN(rollNum) || rollNum < 1 || rollNum > 36) {
         Alert.alert(
           'Access Denied',
-          'Invalid Student Roll Number. Allowed roll numbers are from 111623104001 to 111623104040.'
+          'Invalid Student Roll Number. Allowed roll numbers are from 20924U48001 to 20924U48036.'
         );
         return;
       }
@@ -56,7 +57,7 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
 
     onLogin({
       role,
-      identifier: role === 'admin' ? 'batman' : trimmed,
+      identifier: role === 'admin' ? 'batman' : trimmed.toUpperCase(),
     });
   };
 
@@ -125,14 +126,14 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
                 <Text style={styles.label}>Student Roll Number</Text>
                 <TextInput
                   style={styles.input}
-                  placeholder="e.g. 111623104001"
+                  placeholder="e.g. 20924U48001"
                   placeholderTextColor="#94A3B8"
                   value={identifier}
                   onChangeText={setIdentifier}
-                  keyboardType="number-pad"
+                  autoCapitalize="characters"
                   maxLength={12}
                 />
-                <Text style={styles.inputHint}>Valid range: 111623104001 to 111623104040</Text>
+                <Text style={styles.inputHint}>Valid range: 20924U48001 to 20924U48036</Text>
               </View>
             ) : (
               <View style={styles.inputGroup}>

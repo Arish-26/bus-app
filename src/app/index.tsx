@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import {
   StyleSheet,
   View,
@@ -183,7 +183,7 @@ export default function HomeScreen() {
 
   const renderTile = ({ item }: { item: Bus }) => {
     const filled = hasDetails(item);
-    const bgImage = item.photo ? { uri: item.photo } : { uri: DEFAULT_BUS_IMG };
+    const bgImage = item.photo ? { uri: item.photo } : DEFAULT_BUS_IMG;
 
     return (
       <TouchableOpacity
@@ -233,14 +233,14 @@ export default function HomeScreen() {
 
           {/* User Session & Logout */}
           <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
-            <Text style={styles.logoutBtnText}>Logout 🚪</Text>
+            <Text style={styles.logoutBtnText}>Logout ðŸšª</Text>
           </TouchableOpacity>
         </View>
 
         {/* User Identity Bar */}
         <View style={styles.sessionBar}>
           <Text style={styles.sessionBarText}>
-            👤 {session.role === 'admin' ? 'Admin Mode:' : 'Student Roll #:'}{' '}
+            ðŸ‘¤ {session.role === 'admin' ? 'Admin Mode:' : 'Student Roll #:'}{' '}
             <Text style={styles.boldAmber}>{session.identifier}</Text>
           </Text>
         </View>
@@ -248,13 +248,13 @@ export default function HomeScreen() {
         {/* Stats bar */}
         <View style={styles.statsRow}>
           <Text style={styles.statsText}>
-            🚌 Total: <Text style={styles.boldText}>{buses.length}</Text>
+            ðŸšŒ Total: <Text style={styles.boldText}>{buses.length}</Text>
           </Text>
           <Text style={styles.statsText}>
-            ✅ Routes: <Text style={styles.boldText}>{totalFilled}</Text>
+            âœ… Routes: <Text style={styles.boldText}>{totalFilled}</Text>
           </Text>
           <Text style={styles.statsText}>
-            ⚠️ Pending: <Text style={styles.boldText}>{buses.length - totalFilled}</Text>
+            âš ï¸ Pending: <Text style={styles.boldText}>{buses.length - totalFilled}</Text>
           </Text>
         </View>
       </View>
@@ -262,7 +262,7 @@ export default function HomeScreen() {
       {/* Control Panel: Search & Filter Tabs */}
       <View style={styles.controlPanel}>
         <View style={styles.searchBox}>
-          <Text style={styles.searchIcon}>🔍</Text>
+          <Text style={styles.searchIcon}>ðŸ”</Text>
           <TextInput
             style={styles.searchInput}
             placeholder="Search bus number, driver, or location..."
@@ -272,7 +272,7 @@ export default function HomeScreen() {
           />
           {searchQuery ? (
             <TouchableOpacity onPress={() => setSearchQuery('')}>
-              <Text style={styles.clearSearch}>✕</Text>
+              <Text style={styles.clearSearch}>âœ•</Text>
             </TouchableOpacity>
           ) : null}
         </View>
@@ -620,3 +620,4 @@ const styles = StyleSheet.create({
     lineHeight: 34,
   },
 });
+

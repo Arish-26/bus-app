@@ -7,6 +7,11 @@
     "icon": "./assets/images/icon.png",
     "scheme": "busapp",
     "userInterfaceStyle": "automatic",
+    "extra": {
+      "eas": {
+        "projectId": "1b6b7662-68c5-41c5-aaac-b49bcacb433f"
+      }
+    },
     "ios": {
       "icon": "./assets/expo.icon"
     },

@@ -8,7 +8,7 @@ export interface Bus {
   photo?: string;
 }
 
-const STORAGE_KEY = 'campus_buses_v4';
+const STORAGE_KEY = 'campus_buses_v5';
 
 export const DEFAULT_BUS_IMG = require('../../assets/images/bus-image.jpg');
 export const DEFAULT_CONTACT_NUMBER = '98765 43210';

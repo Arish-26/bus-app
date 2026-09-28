@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { supabase } from './supabase';
 
 export interface Bus {
   number: number;
@@ -80,20 +81,7 @@ const DRIVER_NAMES: string[] = [
   'E. Thirunavukkarasu', 'R. Venkatesan', 'S. Jayaraman', 'T. Subramanian', 'P. Chandran'
 ];
 
-export async function loadBuses(): Promise<Bus[]> {
-  try {
-    const raw = await AsyncStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        return parsed;
-      }
-    }
-  } catch (e) {
-    console.error('Error loading buses from AsyncStorage:', e);
-  }
-
-  // Seed all 50 buses with Tiruvannamalai route locations & same dummy phone number
+function generateInitialSeed(): Bus[] {
   const seed: Bus[] = [];
   for (let i = 1; i <= 50; i++) {
     const route = BUS_ROUTES[i - 1] || `Route ${i} ➔ Campus`;
@@ -106,16 +94,92 @@ export async function loadBuses(): Promise<Bus[]> {
       photo: '',
     });
   }
-
-  await saveBuses(seed);
   return seed;
 }
 
+export async function loadBuses(): Promise<Bus[]> {
+  // 1. Try Supabase Cloud DB
+  try {
+    const { data, error } = await supabase
+      .from('buses')
+      .select('*')
+      .order('number', { ascending: true });
+
+    if (!error && data && data.length > 0) {
+      const cloudBuses: Bus[] = data.map((item) => ({
+        number: item.number,
+        driver: item.driver || '',
+        contact: item.contact || DEFAULT_CONTACT_NUMBER,
+        route: item.route || '',
+        photo: item.photo || '',
+      }));
+      // Update local cache
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(cloudBuses));
+      return cloudBuses;
+    }
+
+    if (!error && data && data.length === 0) {
+      // Seed cloud database if empty
+      const initialSeed = generateInitialSeed();
+      await syncBusesToCloud(initialSeed);
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(initialSeed));
+      return initialSeed;
+    }
+  } catch (err) {
+    console.warn('Supabase cloud fetch warning, falling back to local storage:', err);
+  }
+
+  // 2. Fallback to AsyncStorage
+  try {
+    const raw = await AsyncStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
+    }
+  } catch (e) {
+    console.error('Error loading buses from AsyncStorage:', e);
+  }
+
+  // 3. Fallback Initial Seed
+  const seed = generateInitialSeed();
+  await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(seed));
+  return seed;
+}
+
+export async function syncBusesToCloud(buses: Bus[]): Promise<void> {
+  try {
+    const rows = buses.map((b) => ({
+      number: b.number,
+      driver: b.driver,
+      contact: b.contact,
+      route: b.route,
+      photo: b.photo || '',
+    }));
+    await supabase.from('buses').upsert(rows, { onConflict: 'number' });
+  } catch (err) {
+    console.warn('Supabase cloud sync warning:', err);
+  }
+}
+
 export async function saveBuses(buses: Bus[]): Promise<void> {
+  // 1. Save to local AsyncStorage
   try {
     await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(buses));
   } catch (e) {
     console.error('Error saving buses to AsyncStorage:', e);
+  }
+
+  // 2. Save to Supabase Cloud DB
+  await syncBusesToCloud(buses);
+}
+
+export async function deleteBusFromCloud(busNumber: number): Promise<void> {
+  try {
+    await supabase.from('buses').delete().eq('number', busNumber);
+  } catch (err) {
+    console.warn('Supabase delete warning:', err);
   }
 }
 

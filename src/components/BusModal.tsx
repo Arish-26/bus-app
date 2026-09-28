@@ -20,6 +20,7 @@ interface BusModalProps {
   visible: boolean;
   bus: Bus | null;
   mode: 'view' | 'edit' | 'add';
+  userRole?: 'student' | 'admin';
   onClose: () => void;
   onSave: (updatedBus: Bus) => void;
   onDelete?: (busNumber: number) => void;
@@ -29,6 +30,7 @@ export default function BusModal({
   visible,
   bus,
   mode: initialMode,
+  userRole = 'student',
   onClose,
   onSave,
   onDelete,
@@ -209,20 +211,30 @@ export default function BusModal({
                   </Text>
                 </View>
 
-                {/* Actions available to all users */}
-                <View style={styles.actionButtons}>
-                  <TouchableOpacity
-                    style={styles.primaryButton}
-                    onPress={() => setMode('edit')}
-                  >
-                    <Text style={styles.primaryButtonText}>Edit Bus Details</Text>
-                  </TouchableOpacity>
-                </View>
+                {/* Admin Actions */}
+                {userRole === 'admin' ? (
+                  <>
+                    <View style={styles.actionButtons}>
+                      <TouchableOpacity
+                        style={styles.primaryButton}
+                        onPress={() => setMode('edit')}
+                      >
+                        <Text style={styles.primaryButtonText}>Edit Bus Details</Text>
+                      </TouchableOpacity>
+                    </View>
 
-                {onDelete && (
-                  <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
-                    <Text style={styles.deleteButtonText}>Remove this Bus</Text>
-                  </TouchableOpacity>
+                    {onDelete && (
+                      <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
+                        <Text style={styles.deleteButtonText}>Remove this Bus</Text>
+                      </TouchableOpacity>
+                    )}
+                  </>
+                ) : (
+                  <View style={styles.readOnlyNote}>
+                    <Text style={styles.readOnlyNoteText}>
+                      🔒 Admin authorization required to edit or add bus details.
+                    </Text>
+                  </View>
                 )}
               </View>
             ) : (
@@ -516,5 +528,20 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     textDecorationLine: 'underline',
+  },
+  readOnlyNote: {
+    backgroundColor: '#F1F5F9',
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    alignItems: 'center',
+    marginTop: 6,
+  },
+  readOnlyNoteText: {
+    color: '#64748B',
+    fontSize: 12,
+    fontWeight: '600',
+    textAlign: 'center',
   },
 });

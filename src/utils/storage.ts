@@ -81,7 +81,7 @@ const DRIVER_NAMES: string[] = [
   'E. Thirunavukkarasu', 'R. Venkatesan', 'S. Jayaraman', 'T. Subramanian', 'P. Chandran'
 ];
 
-function generateInitialSeed(): Bus[] {
+export function generateInitialSeed(): Bus[] {
   const seed: Bus[] = [];
   for (let i = 1; i <= 50; i++) {
     const route = BUS_ROUTES[i - 1] || `Route ${i} ➔ Campus`;
@@ -98,7 +98,27 @@ function generateInitialSeed(): Bus[] {
 }
 
 export async function loadBuses(): Promise<Bus[]> {
-  // 1. Try Supabase Cloud DB
+  let localData: Bus[] | null = null;
+
+  // 1. Load from local AsyncStorage cache first (Offline-first speed)
+  try {
+    const raw = await AsyncStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        localData = parsed;
+      }
+    }
+  } catch (e) {
+    console.error('Error loading buses from AsyncStorage:', e);
+  }
+
+  if (!localData) {
+    localData = generateInitialSeed();
+    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(localData));
+  }
+
+  // 2. Fetch latest cloud data from Supabase
   try {
     const { data, error } = await supabase
       .from('buses')
@@ -113,39 +133,19 @@ export async function loadBuses(): Promise<Bus[]> {
         route: item.route || '',
         photo: item.photo || '',
       }));
-      // Update local cache
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(cloudBuses));
       return cloudBuses;
     }
 
     if (!error && data && data.length === 0) {
       // Seed cloud database if empty
-      const initialSeed = generateInitialSeed();
-      await syncBusesToCloud(initialSeed);
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(initialSeed));
-      return initialSeed;
+      await syncBusesToCloud(localData);
     }
   } catch (err) {
-    console.warn('Supabase cloud fetch warning, falling back to local storage:', err);
+    console.warn('Supabase cloud fetch warning, returning local state:', err);
   }
 
-  // 2. Fallback to AsyncStorage
-  try {
-    const raw = await AsyncStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        return parsed;
-      }
-    }
-  } catch (e) {
-    console.error('Error loading buses from AsyncStorage:', e);
-  }
-
-  // 3. Fallback Initial Seed
-  const seed = generateInitialSeed();
-  await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(seed));
-  return seed;
+  return localData;
 }
 
 export async function syncBusesToCloud(buses: Bus[]): Promise<void> {

@@ -288,23 +288,6 @@ export default function BusModal({
                   />
                 </View>
 
-                <View style={styles.inputGroup}>
-                  <Text style={styles.label}>Bus Photo</Text>
-                  <View style={styles.photoActions}>
-                    <TouchableOpacity style={styles.photoPickBtn} onPress={handlePickImage}>
-                      <Text style={styles.photoPickBtnText}>📷 Select Photo</Text>
-                    </TouchableOpacity>
-                    {photo ? (
-                      <TouchableOpacity
-                        style={styles.photoRemoveBtn}
-                        onPress={() => setPhoto('')}
-                      >
-                        <Text style={styles.photoRemoveBtnText}>Remove</Text>
-                      </TouchableOpacity>
-                    ) : null}
-                  </View>
-                </View>
-
                 <View style={styles.actionButtons}>
                   <TouchableOpacity style={styles.primaryButton} onPress={handleSave}>
                     <Text style={styles.primaryButtonText}>

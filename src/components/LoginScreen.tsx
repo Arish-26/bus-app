@@ -26,25 +26,14 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
 
     if (!trimmed) {
       if (role === 'student') {
-        Alert.alert('Roll Number Required', 'Please enter your student Roll Number.');
+        Alert.alert('Name Required', 'Please enter your name or roll number.');
       } else {
         Alert.alert('Admin Name Required', 'Please enter your secret Admin Name.');
       }
       return;
     }
 
-    if (role === 'student') {
-      // Validate roll number range: 20924U48001 to 20924U48036
-      const suffix = trimmed.toUpperCase().match(/^20924U48(\d+)$/);
-      const rollNum = suffix ? parseInt(suffix[1], 10) : NaN;
-      if (!trimmed.toUpperCase().startsWith('20924U48') || isNaN(rollNum) || rollNum < 1 || rollNum > 36) {
-        Alert.alert(
-          'Access Denied',
-          'Invalid Student Roll Number. Allowed roll numbers are from 20924U48001 to 20924U48036.'
-        );
-        return;
-      }
-    } else {
+    if (role === 'admin') {
       // Validate secret admin name: "batman"
       if (trimmed.toLowerCase() !== 'batman') {
         Alert.alert(
@@ -123,17 +112,17 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
             {/* Input Field */}
             {role === 'student' ? (
               <View style={styles.inputGroup}>
-                <Text style={styles.label}>Student Roll Number</Text>
+                <Text style={styles.label}>Your Name or Roll Number</Text>
                 <TextInput
                   style={styles.input}
-                  placeholder="e.g. 20924U48001"
+                  placeholder="Enter your name or roll number"
                   placeholderTextColor="#94A3B8"
                   value={identifier}
                   onChangeText={setIdentifier}
-                  autoCapitalize="characters"
-                  maxLength={12}
+                  autoCapitalize="words"
+                  maxLength={30}
                 />
-                <Text style={styles.inputHint}>Valid range: 20924U48001 to 20924U48036</Text>
+                <Text style={styles.inputHint}>Anyone can log in as a student</Text>
               </View>
             ) : (
               <View style={styles.inputGroup}>

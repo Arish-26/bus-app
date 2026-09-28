@@ -22,7 +22,6 @@ import {
   DEFAULT_BUS_IMG,
 } from '@/utils/storage';
 import BusModal from '@/components/BusModal';
-import AdminUnlockModal from '@/components/AdminUnlockModal';
 
 export default function HomeScreen() {
   const [buses, setBuses] = useState<Bus[]>([]);
@@ -30,8 +29,6 @@ export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterMode, setFilterMode] = useState<'all' | 'filled' | 'empty'>('all');
-  const [isAdminMode, setIsAdminMode] = useState(false);
-  const [adminModalVisible, setAdminModalVisible] = useState(false);
 
   // Modal State
   const [modalVisible, setModalVisible] = useState(false);
@@ -103,21 +100,6 @@ export default function HomeScreen() {
     setModalVisible(false);
   };
 
-  const toggleAdminMode = () => {
-    if (!isAdminMode) {
-      setAdminModalVisible(true);
-    } else {
-      setIsAdminMode(false);
-      Alert.alert('Admin Mode Switched Off', 'Switched back to Student view mode.');
-    }
-  };
-
-  const handleAdminUnlockSuccess = () => {
-    setIsAdminMode(true);
-    setAdminModalVisible(false);
-    Alert.alert('Admin Unlocked 🛠️', 'You can now edit bus details and add new buses.');
-  };
-
   // Filtered bus list
   const filteredBuses = buses.filter((bus) => {
     const filled = hasDetails(bus);
@@ -186,13 +168,6 @@ export default function HomeScreen() {
               Campus <Text style={styles.amberText}>Bus</Text> Tracker
             </Text>
           </View>
-
-          {/* Admin Mode Toggle */}
-          <TouchableOpacity style={styles.adminToggleBtn} onPress={toggleAdminMode}>
-            <Text style={styles.adminToggleText}>
-              {isAdminMode ? '🛠️ Admin Mode (ON)' : '🔒 Admin Mode'}
-            </Text>
-          </TouchableOpacity>
         </View>
 
         {/* Stats bar */}
@@ -300,29 +275,19 @@ export default function HomeScreen() {
         />
       )}
 
-      {/* Floating Add Bus Button - Available in Admin Mode */}
-      {isAdminMode && (
-        <TouchableOpacity style={styles.fab} activeOpacity={0.85} onPress={handleOpenAdd}>
-          <Text style={styles.fabText}>+</Text>
-        </TouchableOpacity>
-      )}
+      {/* Floating Add Bus Button */}
+      <TouchableOpacity style={styles.fab} activeOpacity={0.85} onPress={handleOpenAdd}>
+        <Text style={styles.fabText}>+</Text>
+      </TouchableOpacity>
 
       {/* View/Edit/Add Bus Modal */}
       <BusModal
         visible={modalVisible}
         bus={selectedBus}
         mode={modalMode}
-        userRole={isAdminMode ? 'admin' : 'student'}
         onClose={() => setModalVisible(false)}
         onSave={handleSaveBus}
         onDelete={handleDeleteBus}
-      />
-
-      {/* Cross-Platform Admin Unlock Modal */}
-      <AdminUnlockModal
-        visible={adminModalVisible}
-        onClose={() => setAdminModalVisible(false)}
-        onSuccess={handleAdminUnlockSuccess}
       />
     </SafeAreaView>
   );

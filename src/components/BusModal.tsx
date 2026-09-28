@@ -20,7 +20,7 @@ interface BusModalProps {
   visible: boolean;
   bus: Bus | null;
   mode: 'view' | 'edit' | 'add';
-  userRole: 'student' | 'admin';
+  userRole?: 'student' | 'admin';
   onClose: () => void;
   onSave: (updatedBus: Bus) => void;
   onDelete?: (busNumber: number) => void;
@@ -30,7 +30,6 @@ export default function BusModal({
   visible,
   bus,
   mode: initialMode,
-  userRole,
   onClose,
   onSave,
   onDelete,
@@ -211,24 +210,20 @@ export default function BusModal({
                   </Text>
                 </View>
 
-                {/* Admin Actions */}
-                {userRole === 'admin' && (
-                  <>
-                    <View style={styles.actionButtons}>
-                      <TouchableOpacity
-                        style={styles.primaryButton}
-                        onPress={() => setMode('edit')}
-                      >
-                        <Text style={styles.primaryButtonText}>Edit Bus Details</Text>
-                      </TouchableOpacity>
-                    </View>
+                {/* Actions available to all users */}
+                <View style={styles.actionButtons}>
+                  <TouchableOpacity
+                    style={styles.primaryButton}
+                    onPress={() => setMode('edit')}
+                  >
+                    <Text style={styles.primaryButtonText}>Edit Bus Details</Text>
+                  </TouchableOpacity>
+                </View>
 
-                    {onDelete && (
-                      <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
-                        <Text style={styles.deleteButtonText}>Remove this Bus</Text>
-                      </TouchableOpacity>
-                    )}
-                  </>
+                {onDelete && (
+                  <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
+                    <Text style={styles.deleteButtonText}>Remove this Bus</Text>
+                  </TouchableOpacity>
                 )}
               </View>
             ) : (

@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   StyleSheet,
   View,
@@ -13,7 +13,6 @@ import {
   useWindowDimensions,
   RefreshControl,
   Alert,
-  Platform,
 } from 'react-native';
 import {
   loadBuses,
@@ -21,23 +20,16 @@ import {
   hasDetails,
   Bus,
   DEFAULT_BUS_IMG,
-  UserSession,
-  getSavedSession,
-  saveSession,
-  clearSession,
 } from '@/utils/storage';
 import BusModal from '@/components/BusModal';
-import LoginScreen from '@/components/LoginScreen';
 
 export default function HomeScreen() {
-  const [session, setSession] = useState<UserSession | null>(null);
-  const [checkingSession, setCheckingSession] = useState(true);
-
   const [buses, setBuses] = useState<Bus[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterMode, setFilterMode] = useState<'all' | 'filled' | 'empty'>('all');
+  const [isAdminMode, setIsAdminMode] = useState(false);
 
   // Modal State
   const [modalVisible, setModalVisible] = useState(false);
@@ -46,18 +38,6 @@ export default function HomeScreen() {
 
   const { width } = useWindowDimensions();
   const numColumns = width > 500 ? 4 : 3;
-
-  // Load User Session & Bus Data
-  useEffect(() => {
-    async function init() {
-      const savedSession = await getSavedSession();
-      if (savedSession) {
-        setSession(savedSession);
-      }
-      setCheckingSession(false);
-    }
-    init();
-  }, []);
 
   const fetchBuses = useCallback(async () => {
     try {
@@ -72,37 +52,8 @@ export default function HomeScreen() {
   }, []);
 
   useEffect(() => {
-    if (session) {
-      fetchBuses();
-    }
-  }, [session, fetchBuses]);
-
-  const handleLogin = async (newSession: UserSession) => {
-    setSession(newSession);
-    await saveSession(newSession);
-  };
-
-  const handleLogout = async () => {
-    const doLogout = async () => {
-      await clearSession();
-      setSession(null);
-    };
-
-    if (Platform.OS === 'web') {
-      if (typeof window !== 'undefined' && window.confirm('Are you sure you want to log out?')) {
-        await doLogout();
-      }
-    } else {
-      Alert.alert('Logout', 'Are you sure you want to log out?', [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Logout',
-          style: 'destructive',
-          onPress: doLogout,
-        },
-      ]);
-    }
-  };
+    fetchBuses();
+  }, [fetchBuses]);
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -150,18 +101,33 @@ export default function HomeScreen() {
     setModalVisible(false);
   };
 
-  if (checkingSession) {
-    return (
-      <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#FFC93C" />
-      </View>
-    );
-  }
-
-  // Show Login Screen if no active session
-  if (!session) {
-    return <LoginScreen onLogin={handleLogin} />;
-  }
+  const toggleAdminMode = () => {
+    if (!isAdminMode) {
+      Alert.prompt
+        ? Alert.prompt(
+            'Admin Mode',
+            'Enter secret admin code:',
+            [
+              { text: 'Cancel', style: 'cancel' },
+              {
+                text: 'Unlock',
+                onPress: (text?: string) => {
+                  if (text && text.trim().toLowerCase() === 'batman') {
+                    setIsAdminMode(true);
+                    Alert.alert('Admin Unlocked', 'You can now edit bus details and add new buses.');
+                  } else {
+                    Alert.alert('Access Denied', 'Incorrect admin code.');
+                  }
+                },
+              },
+            ],
+            'secure-text'
+          )
+        : setIsAdminMode(!isAdminMode);
+    } else {
+      setIsAdminMode(false);
+    }
+  };
 
   // Filtered bus list
   const filteredBuses = buses.filter((bus) => {
@@ -219,42 +185,37 @@ export default function HomeScreen() {
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="light-content" backgroundColor="#182645" />
 
-      {/* College & App Header */}
+      {/* College Header Banner */}
       <View style={styles.header}>
         <View style={styles.headerTopRow}>
           <View style={{ flex: 1 }}>
             <Text style={styles.collegeName}>
-              SHANMUGA INDUSTRIES ARTS &amp; SCIENCE COLLEGE
+              SHANMUGA INDUSTRIES ARTS AND SCIENCE COLLEGE
             </Text>
+            <Text style={styles.locationTag}>TIRUVANNAMALAI</Text>
             <Text style={styles.appTitle}>
               Campus <Text style={styles.amberText}>Bus</Text> Tracker
             </Text>
           </View>
 
-          {/* User Session & Logout */}
-          <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
-            <Text style={styles.logoutBtnText}>Logout ðŸšª</Text>
+          {/* Optional Admin Mode Toggle */}
+          <TouchableOpacity style={styles.adminToggleBtn} onPress={toggleAdminMode}>
+            <Text style={styles.adminToggleText}>
+              {isAdminMode ? '🛠️ Admin Mode (ON)' : '🔒 Admin Mode'}
+            </Text>
           </TouchableOpacity>
-        </View>
-
-        {/* User Identity Bar */}
-        <View style={styles.sessionBar}>
-          <Text style={styles.sessionBarText}>
-            ðŸ‘¤ {session.role === 'admin' ? 'Admin Mode:' : 'Student Roll #:'}{' '}
-            <Text style={styles.boldAmber}>{session.identifier}</Text>
-          </Text>
         </View>
 
         {/* Stats bar */}
         <View style={styles.statsRow}>
           <Text style={styles.statsText}>
-            ðŸšŒ Total: <Text style={styles.boldText}>{buses.length}</Text>
+            🚌 Total: <Text style={styles.boldText}>{buses.length}</Text>
           </Text>
           <Text style={styles.statsText}>
-            âœ… Routes: <Text style={styles.boldText}>{totalFilled}</Text>
+            ✅ Active Routes: <Text style={styles.boldText}>{totalFilled}</Text>
           </Text>
           <Text style={styles.statsText}>
-            âš ï¸ Pending: <Text style={styles.boldText}>{buses.length - totalFilled}</Text>
+            ⚠️ Pending: <Text style={styles.boldText}>{buses.length - totalFilled}</Text>
           </Text>
         </View>
       </View>
@@ -262,17 +223,17 @@ export default function HomeScreen() {
       {/* Control Panel: Search & Filter Tabs */}
       <View style={styles.controlPanel}>
         <View style={styles.searchBox}>
-          <Text style={styles.searchIcon}>ðŸ”</Text>
+          <Text style={styles.searchIcon}>🔍</Text>
           <TextInput
             style={styles.searchInput}
-            placeholder="Search bus number, driver, or location..."
+            placeholder="Search bus number, driver, or route location..."
             placeholderTextColor="#94A3B8"
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
           {searchQuery ? (
             <TouchableOpacity onPress={() => setSearchQuery('')}>
-              <Text style={styles.clearSearch}>âœ•</Text>
+              <Text style={styles.clearSearch}>✕</Text>
             </TouchableOpacity>
           ) : null}
         </View>
@@ -302,7 +263,7 @@ export default function HomeScreen() {
                 filterMode === 'filled' && styles.filterTabTextActive,
               ]}
             >
-              On File ({totalFilled})
+              Active Routes ({totalFilled})
             </Text>
           </TouchableOpacity>
 
@@ -350,8 +311,8 @@ export default function HomeScreen() {
         />
       )}
 
-      {/* Floating Add Bus Button - ONLY FOR ADMIN */}
-      {session.role === 'admin' && (
+      {/* Floating Add Bus Button - Available in Admin Mode */}
+      {isAdminMode && (
         <TouchableOpacity style={styles.fab} activeOpacity={0.85} onPress={handleOpenAdd}>
           <Text style={styles.fabText}>+</Text>
         </TouchableOpacity>
@@ -362,7 +323,7 @@ export default function HomeScreen() {
         visible={modalVisible}
         bus={selectedBus}
         mode={modalMode}
-        userRole={session.role}
+        userRole={isAdminMode ? 'admin' : 'student'}
         onClose={() => setModalVisible(false)}
         onSave={handleSaveBus}
         onDelete={handleDeleteBus}
@@ -390,11 +351,17 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   collegeName: {
-    color: '#B9C2DC',
-    fontSize: 10,
-    fontWeight: '700',
+    color: '#FFC93C',
+    fontSize: 11,
+    fontWeight: '800',
     letterSpacing: 0.5,
     textTransform: 'uppercase',
+  },
+  locationTag: {
+    color: '#B9C2DC',
+    fontSize: 11,
+    fontWeight: '700',
+    marginTop: 1,
   },
   appTitle: {
     color: '#FFFFFF',
@@ -405,7 +372,7 @@ const styles = StyleSheet.create({
   amberText: {
     color: '#FFC93C',
   },
-  logoutBtn: {
+  adminToggleBtn: {
     backgroundColor: 'rgba(255, 201, 60, 0.15)',
     borderWidth: 1,
     borderColor: '#FFC93C',
@@ -413,25 +380,9 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 8,
   },
-  logoutBtnText: {
+  adminToggleText: {
     color: '#FFC93C',
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  sessionBar: {
-    marginTop: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 6,
-    alignSelf: 'flex-start',
-  },
-  sessionBarText: {
-    color: '#CBD5E1',
-    fontSize: 12,
-  },
-  boldAmber: {
-    color: '#FFC93C',
+    fontSize: 11,
     fontWeight: '700',
   },
   statsRow: {
@@ -620,4 +571,3 @@ const styles = StyleSheet.create({
     lineHeight: 34,
   },
 });
-

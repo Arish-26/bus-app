@@ -8,18 +8,12 @@ export interface Bus {
   photo?: string;
 }
 
-export interface UserSession {
-  role: 'student' | 'admin';
-  identifier: string; // Roll number for student, Admin name for admin
-}
-
-const STORAGE_KEY = 'campus_buses_v3';
-const SESSION_KEY = 'campus_bus_user_session';
+const STORAGE_KEY = 'campus_buses_v4';
 
 export const DEFAULT_BUS_IMG = require('../../assets/images/bus-image.jpg');
 export const DEFAULT_CONTACT_NUMBER = '98765 43210';
 
-// 50 Tiruvannamalai District & Regional Routes for Shanmuga Industries Arts & Science College
+// 50 Tiruvannamalai District & Regional Routes for Shanmuga Industries Arts and Science College
 const BUS_ROUTES: string[] = [
   'Polur ➔ Campus',
   'Chengam ➔ Campus',
@@ -131,32 +125,4 @@ export function hasDetails(bus: Bus): boolean {
     (bus.contact && bus.contact.trim().length > 0) ||
     (bus.route && bus.route.trim().length > 0)
   );
-}
-
-/* User Session Helpers */
-
-export async function getSavedSession(): Promise<UserSession | null> {
-  try {
-    const raw = await AsyncStorage.getItem(SESSION_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch (e) {
-    console.error('Error reading session:', e);
-  }
-  return null;
-}
-
-export async function saveSession(session: UserSession): Promise<void> {
-  try {
-    await AsyncStorage.setItem(SESSION_KEY, JSON.stringify(session));
-  } catch (e) {
-    console.error('Error saving session:', e);
-  }
-}
-
-export async function clearSession(): Promise<void> {
-  try {
-    await AsyncStorage.removeItem(SESSION_KEY);
-  } catch (e) {
-    console.error('Error clearing session:', e);
-  }
 }

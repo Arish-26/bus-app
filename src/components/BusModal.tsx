@@ -20,7 +20,6 @@ interface BusModalProps {
   visible: boolean;
   bus: Bus | null;
   mode: 'view' | 'edit' | 'add';
-  userRole?: 'student' | 'admin';
   onClose: () => void;
   onSave: (updatedBus: Bus) => void;
   onDelete?: (busNumber: number) => void;

@@ -22,6 +22,7 @@ import {
   DEFAULT_BUS_IMG,
 } from '@/utils/storage';
 import BusModal from '@/components/BusModal';
+import AdminUnlockModal from '@/components/AdminUnlockModal';
 
 export default function HomeScreen() {
   const [buses, setBuses] = useState<Bus[]>([]);
@@ -30,6 +31,7 @@ export default function HomeScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterMode, setFilterMode] = useState<'all' | 'filled' | 'empty'>('all');
   const [isAdminMode, setIsAdminMode] = useState(false);
+  const [adminModalVisible, setAdminModalVisible] = useState(false);
 
   // Modal State
   const [modalVisible, setModalVisible] = useState(false);
@@ -103,30 +105,17 @@ export default function HomeScreen() {
 
   const toggleAdminMode = () => {
     if (!isAdminMode) {
-      Alert.prompt
-        ? Alert.prompt(
-            'Admin Mode',
-            'Enter secret admin code:',
-            [
-              { text: 'Cancel', style: 'cancel' },
-              {
-                text: 'Unlock',
-                onPress: (text?: string) => {
-                  if (text && text.trim().toLowerCase() === 'batman') {
-                    setIsAdminMode(true);
-                    Alert.alert('Admin Unlocked', 'You can now edit bus details and add new buses.');
-                  } else {
-                    Alert.alert('Access Denied', 'Incorrect admin code.');
-                  }
-                },
-              },
-            ],
-            'secure-text'
-          )
-        : setIsAdminMode(!isAdminMode);
+      setAdminModalVisible(true);
     } else {
       setIsAdminMode(false);
+      Alert.alert('Admin Mode Switched Off', 'Switched back to Student view mode.');
     }
+  };
+
+  const handleAdminUnlockSuccess = () => {
+    setIsAdminMode(true);
+    setAdminModalVisible(false);
+    Alert.alert('Admin Unlocked 🛠️', 'You can now edit bus details and add new buses.');
   };
 
   // Filtered bus list
@@ -198,7 +187,7 @@ export default function HomeScreen() {
             </Text>
           </View>
 
-          {/* Optional Admin Mode Toggle */}
+          {/* Admin Mode Toggle */}
           <TouchableOpacity style={styles.adminToggleBtn} onPress={toggleAdminMode}>
             <Text style={styles.adminToggleText}>
               {isAdminMode ? '🛠️ Admin Mode (ON)' : '🔒 Admin Mode'}
@@ -327,6 +316,13 @@ export default function HomeScreen() {
         onClose={() => setModalVisible(false)}
         onSave={handleSaveBus}
         onDelete={handleDeleteBus}
+      />
+
+      {/* Cross-Platform Admin Unlock Modal */}
+      <AdminUnlockModal
+        visible={adminModalVisible}
+        onClose={() => setAdminModalVisible(false)}
+        onSuccess={handleAdminUnlockSuccess}
       />
     </SafeAreaView>
   );
